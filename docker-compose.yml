@@ -11,7 +11,7 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql
     restart: unless-stopped
-    # DÖNGÜ HATASI BURADAYDI, depends_on KALDIRILDI.
+    
 
   rabbitmq:
     image: rabbitmq:3-management
