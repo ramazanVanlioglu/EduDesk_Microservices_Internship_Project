@@ -1,0 +1,8 @@
+POST http://localhost:54496/api/tickets
+Content-Type: application/json
+
+{
+  "title": "Video oynatıcı açılmıyor",
+  "description": "Canlı ders linkine tıkladığımda siyah ekranda kalıyor.",
+  "userId": "1001"
+}

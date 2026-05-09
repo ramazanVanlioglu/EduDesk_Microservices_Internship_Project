@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Backend/ApiGateway/ApiGateway.csproj" />
+  <Project Path="Backend/IdentityService/IdentityService.csproj" />
+  <Project Path="Backend/LearningService/LearningService.csproj" />
+  <Project Path="Backend/SupportService/SupportService.csproj" />
+  <Project Path="Backend/WorkerService/WorkerService.csproj" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

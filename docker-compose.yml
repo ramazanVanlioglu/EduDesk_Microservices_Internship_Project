@@ -1,0 +1,99 @@
+services:
+  # Altyapı Servisleri
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql_server
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Ramazan223205050?
+    volumes:
+      - mssql_data:/var/opt/mssql
+    restart: unless-stopped
+    # DÖNGÜ HATASI BURADAYDI, depends_on KALDIRILDI.
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: edudesk_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: edudesk_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Mikroservisler
+  identityservice:
+    image: ${DOCKER_REGISTRY-}identityservice
+    build:
+      context: .
+      dockerfile: Backend/IdentityService/Dockerfile
+    depends_on:
+      - mssql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=IdentityDb;User Id=sa;Password=Ramazan223205050?;TrustServerCertificate=True;
+
+  learningservice:
+    image: ${DOCKER_REGISTRY-}learningservice
+    build:
+      context: .
+      dockerfile: Backend/LearningService/Dockerfile
+    depends_on:
+      - mssql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=LearningDb;User Id=sa;Password=Ramazan223205050?;TrustServerCertificate=True;
+
+  supportservice:
+    image: ${DOCKER_REGISTRY-}supportservice
+    build:
+      context: .
+      dockerfile: Backend/SupportService/Dockerfile
+    depends_on:
+      - mssql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=SupportDb;User Id=sa;Password=Ramazan223205050?;TrustServerCertificate=True;
+
+  workerservice:
+    image: ${DOCKER_REGISTRY-}workerservice
+    build:
+      context: .
+      dockerfile: Backend/WorkerService/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+
+  apigateway:
+    container_name: edudesk_gateway
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: Backend/ApiGateway/Dockerfile
+    ports:
+      - "54496:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - identityservice
+      - learningservice
+      - supportservice
+
+volumes:
+  mssql_data:
